@@ -3,9 +3,7 @@ import controllerWrapper from '../decorators/controllerWrapper.js';
 
 const getAreas = async (req, res) => {
   const areas = await areasServices.findAreas();
-  res.status(201).json({
-    areas
-  });
+  res.status(201).json(areas);
 };
 
 export default {
