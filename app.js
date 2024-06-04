@@ -4,6 +4,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import 'dotenv/config';
 import usersRouter from './routes/usersRouter.js';
+import areasRouter from "./routes/areasRouter.js";
 import ingredientsRouter from './routes/ingredientsRouter.js';
 
 const { DB_HOST, PORT = 3000 } = process.env;
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/api/users', usersRouter);
+app.use('/api/areas', areasRouter);
 app.use('/api/ingredients', ingredientsRouter);
 
 app.use((_, res) => {
