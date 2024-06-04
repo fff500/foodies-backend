@@ -3,8 +3,8 @@ import morgan from 'morgan';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import 'dotenv/config';
-
 import usersRouter from './routes/usersRouter.js';
+import ingredientsRouter from './routes/ingredientsRouter.js';
 
 const { DB_HOST, PORT = 3000 } = process.env;
 
@@ -16,6 +16,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/api/users', usersRouter);
+app.use('/api/ingredients', ingredientsRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: 'Route not found' });
