@@ -7,7 +7,7 @@ const testimonialsSchema = new Schema(
       required: [true, "Testimonial is required"],
     },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const Testimonial = model("testimonial", testimonialsSchema);
