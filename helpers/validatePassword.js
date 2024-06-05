@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 const validatePassword = (password, hashedPassword) =>
   bcrypt.compare(password, hashedPassword);

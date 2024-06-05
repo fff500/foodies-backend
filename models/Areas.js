@@ -1,15 +1,15 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
-const  areasSchema = new Schema(
+const areasSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, 'Area is required'],
+      required: [true, "Area is required"],
     },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
-const Area = model('area', areasSchema);
+const Area = model("area", areasSchema);
 
 export default Area;
