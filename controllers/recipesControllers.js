@@ -15,7 +15,7 @@ const getFilterdRecipes = async (req, res) => {
   const filter = {
     ...(category ? { category } : {}),
     ...(area ? { area } : {}),
-    ...(ingredient ? { ingredients: { id: ingredient } } : {}),
+    ...(ingredient ? { ingredients: { $elemMatch: { id: ingredient } } } : {}),
   };
 
   const skip = (page - 1) * limit;
