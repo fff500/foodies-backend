@@ -1,11 +1,10 @@
-import express from "express";
-import morgan from "morgan";
-import cors from "cors";
-import mongoose from "mongoose";
-import "dotenv/config";
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import 'dotenv/config';
 
 import usersRouter from "./routes/usersRouter.js";
-import recipesRouter from "./routes/recipesRouter.js";
 
 const { DB_HOST, PORT = 3000 } = process.env;
 
@@ -17,7 +16,6 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.use("/api/users", usersRouter);
-app.use("/api/recipes", recipesRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
