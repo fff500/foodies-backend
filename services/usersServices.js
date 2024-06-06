@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import gravatar from "gravatar";
 import jwt from "jsonwebtoken";
+import jimp from "jimp";
+import path from "path";
 
 import User from "../models/User.js";
 
@@ -23,3 +25,19 @@ export const checkUserPassword = async (password, hashPassword) =>
 export const createToken = async (data) => {
   return jwt.sign(data, process.env.JWT_SECRET);
 };
+
+export async function updateAvatar(originalPath, originalName) {
+  const newPath = path.resolve("public/avatars", originalName);
+
+  await jimp
+    .read(originalPath)
+    .then((image) => {
+      return image.resize(250, 250).write(newPath);
+    })
+    .catch((err) => {
+      console.error("Error resizing avatar:", err.message);
+      throw new Error("Error resizing avatar");
+    });
+
+  return newPath;
+}

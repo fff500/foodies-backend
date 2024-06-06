@@ -12,7 +12,7 @@ const signup = async (req, res) => {
 
   const newUser = await usersServices.saveUser(req.body);
 
-  res.status(201).json({
+  res.status(200).json({
     user: {
       email: newUser.email,
     },
@@ -39,7 +39,7 @@ const login = async (req, res) => {
     { token }
   );
 
-  res.status(201).json({
+  res.status(200).json({
     user: {
       email: updatedUser.email,
       token: updatedUser.token,
@@ -50,7 +50,7 @@ const login = async (req, res) => {
 const current = async (req, res) => {
   const { email, name, avatar } = req.user;
 
-  res.status(201).json({
+  res.status(200).json({
     user: {
       email,
       name,
@@ -87,7 +87,7 @@ const getUserInfo = async (req, res) => {
     };
   }
 
-  res.status(201).json({
+  res.status(200).json({
     email: user.email,
     name: user.name,
     avatar: user.avatar,
@@ -98,22 +98,15 @@ const getUserInfo = async (req, res) => {
 const updateAvatar = async (req, res) => {
   const { _id } = req.user;
   const oldPath = req.file.path;
-  const newPath = path.resolve("public/avatars", req.file.originalname);
+  const avatarName = req.file.originalname;
 
-  await jimp
-    .read(oldPath)
-    .then((image) => {
-      return image.resize(250, 250).write(newPath);
-    })
-    .catch((err) => {
-      console.error("Error resizing avatar:", err.message);
-      throw new Error("Error resizing avatar");
-    });
+  const newPath = await usersServices.updateAvatar(oldPath, avatarName);
+  const updatedUser = await usersServices.updateUser(
+    { _id: _id },
+    { avatar: newPath }
+  );
 
-  const avatar = req.file.originalname;
-  const updatedUser = await usersServices.updateUser({ _id: _id }, { avatar });
-
-  res.status(201).json({
+  res.status(200).json({
     avatar: updatedUser.avatar,
   });
 };
@@ -129,13 +122,13 @@ const logout = async (req, res) => {
 const getFollowers = async (req, res) => {
   const { followers } = req.user;
 
-  res.status(201).json({ followers });
+  res.status(200).json({ followers });
 };
 
 const getFollowing = async (req, res) => {
   const { following } = req.user;
 
-  res.status(201).json({ following });
+  res.status(200).json({ following });
 };
 
 const followUser = async (req, res) => {
@@ -151,7 +144,7 @@ const followUser = async (req, res) => {
     { $push: { followers: req.user._id } }
   );
 
-  res.status(201).json({ success: true });
+  res.status(200).json({ success: true });
 };
 
 const unfollowUser = async (req, res) => {
@@ -167,7 +160,7 @@ const unfollowUser = async (req, res) => {
     { $pull: { followers: req.user._id } }
   );
 
-  res.status(201).json({ success: true });
+  res.status(200).json({ success: true });
 };
 
 export default {
