@@ -3,7 +3,7 @@ import controllerWrapper from "../decorators/controllerWrapper.js";
 
 const getCategories = async (req, res) => {
   const categories = await categoriesService.findCategories();
-  res.status(201).json(categories);
+  res.json(categories);
 };
 
 export default {
