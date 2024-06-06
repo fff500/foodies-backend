@@ -17,8 +17,22 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    avatar: {
+      type: String,
+    },
+    name: {
+      type: String,
+    },
+    followers: {
+      type: [Schema.Types.ObjectId], // assumes an array of users id
+      default: [],
+    },
+    following: {
+      type: [Schema.Types.ObjectId], // assumes an array of users id
+      default: [],
+    },
   },
-  { versionKey: false, timestamps: true },
+  { versionKey: false, timestamps: true }
 );
 
 userSchema.post("save", handleSaveError);
