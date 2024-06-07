@@ -61,7 +61,6 @@ const createRecipe = async (req, res) => {
     throw HttpError(400);
   }
 
-  newRecipe.favoriteByUsers = undefined;
   newRecipe.favoritesCount = undefined;
 
   res.status(201).json(newRecipe);

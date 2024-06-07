@@ -46,6 +46,10 @@ const recipesSchema = new Schema(
       ],
       required: true,
     },
+    favoritesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { versionKey: false }
 );

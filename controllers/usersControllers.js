@@ -182,6 +182,11 @@ const addFavorite = async (req, res) => {
     { $push: { favorites: id }, $inc: { favoritesCount: 1 } }
   );
 
+  await recipesServices.addToFavorite(
+    { _id: id },
+    { $inc: { favoritesCount: 1 } }
+  );
+
   if (!updatedUser) {
     throw HttpError(404);
   }
@@ -207,6 +212,11 @@ const deleteFavorite = async (req, res) => {
   const updatedUsers = await usersServices.updateUser(
     { _id },
     { $pull: { favorites: id }, $inc: { favoritesCount: -1 } }
+  );
+
+  await recipesServices.addToFavorite(
+    { _id: id },
+    { $inc: { favoritesCount: -1 } }
   );
 
   res.json(updatedUsers);
