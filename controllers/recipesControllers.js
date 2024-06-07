@@ -99,81 +99,6 @@ const getOwnRecipes = async (req, res) => {
   res.json(recipes);
 };
 
-const addFavorite = async (req, res) => {
-  const {
-    user: { _id: userId },
-    params: { id: _id },
-  } = req;
-
-  const isRecipeAdded = await recipesServices.findOne({
-    _id,
-    favoriteByUsers: userId,
-  });
-
-  if (isRecipeAdded) {
-    throw HttpError(404, "Recipe has been already added");
-  }
-
-  const updatedRecipe = await recipesServices.addToFavorite(
-    { _id },
-    { $push: { favoriteByUsers: userId }, $inc: { favoritesCount: 1 } }
-  );
-
-  if (!updatedRecipe) {
-    throw HttpError(404);
-  }
-
-  res.json(updatedRecipe);
-};
-
-const deleteFavorite = async (req, res) => {
-  const {
-    user: { _id: userId },
-    params: { id: _id },
-  } = req;
-
-  const isRecipeAdded = await recipesServices.findOne({
-    _id,
-    favoriteByUsers: userId,
-  });
-
-  if (!isRecipeAdded) {
-    throw HttpError(404, "Recipe hasn't been added yet");
-  }
-
-  const updatedRecipe = await recipesServices.addToFavorite(
-    { _id },
-    { $pull: { favoriteByUsers: userId }, $inc: { favoritesCount: -1 } }
-  );
-
-  res.json(updatedRecipe);
-};
-
-const getFavorites = async (req, res) => {
-  const { _id: favoriteByUsers } = req.user;
-  const { page = 1, limit = 20 } = req.query;
-
-  const filter = { favoriteByUsers };
-  const skip = getSkip(page, limit);
-  const options = { skip, limit };
-
-  const favoriteRecipes = await recipesServices.findRecipes({
-    filter,
-    options,
-  });
-
-  res.json(favoriteRecipes);
-};
-
-const getFavoritesCount = async (req, res) => {
-  const { _id: favoriteByUsers } = req.user;
-  const total = await recipesServices.countDocuments({
-    favoriteByUsers,
-  });
-
-  res.json({ total });
-};
-
 export default {
   getFilterdRecipes: controllerWrapper(getFilterdRecipes),
   findRecipe: controllerWrapper(findRecipe),
@@ -181,8 +106,4 @@ export default {
   createRecipe: controllerWrapper(createRecipe),
   deleteRecipe: controllerWrapper(deleteRecipe),
   getOwnRecipes: controllerWrapper(getOwnRecipes),
-  addFavorite: controllerWrapper(addFavorite),
-  deleteFavorite: controllerWrapper(deleteFavorite),
-  getFavorites: controllerWrapper(getFavorites),
-  getFavoritesCount: controllerWrapper(getFavoritesCount),
 };

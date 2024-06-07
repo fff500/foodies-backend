@@ -2,6 +2,9 @@ import * as usersServices from "../services/usersServices.js";
 import * as recipesServices from "../services/recipesServices.js";
 import HttpError from "../helpers/HttpError.js";
 import controllerWrapper from "../decorators/controllerWrapper.js";
+import { getSkip } from "../helpers/getSkip.js";
+import validatePassword from "../helpers/validatePassword.js";
+import { createToken } from "../helpers/jwt.js";
 
 const signup = async (req, res) => {
   const user = await usersServices.findUser({ email: req.body.email });
@@ -22,7 +25,7 @@ const login = async (req, res) => {
 
   if (!user) throw HttpError(409, "Email or password is wrong");
 
-  const isPasswordSame = await usersServices.checkUserPassword(
+  const isPasswordSame = await validatePassword(
     req.body.password,
     user.password
   );
@@ -31,7 +34,7 @@ const login = async (req, res) => {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  const token = await usersServices.createToken({ id: user.id });
+  const token = createToken({ id: user.id });
   const updatedUser = await usersServices.updateUser(
     { _id: user.id },
     { token }
@@ -46,41 +49,48 @@ const login = async (req, res) => {
 };
 
 const current = async (req, res) => {
-  const { email, name, avatar } = req.user;
+  const { email, name, avatar, favorites, favoritesCount } = req.user;
 
   res.status(200).json({
     user: {
       email,
       name,
       avatar,
+      favorites,
+      favoritesCount,
     },
   });
 };
 
 const getUserInfo = async (req, res) => {
-  const { _id } = req.user;
+  const { email: userEmail } = req.params;
 
-  const user = await usersServices.findUser({ _id });
+  const user = await usersServices.findUser({ email: userEmail });
 
   if (!user) throw HttpError(404, "User not found");
 
-  const followersCount = user.followers.length;
-  const followingCount = user.following.length;
+  const { followers, following, favorites, email, name, avatar } = user;
+
   const createdRecipesCount = await recipesServices.countDocuments({
-    owner: _id,
+    owner: user._id,
   });
-  const favoriteRecipesCount = await recipesServices.countDocuments({
-    favoriteByUsers: _id,
-  });
+  const followersCount = followers.length;
+
+  const additionalInfo = {
+    createdRecipesCount,
+    followersCount,
+  };
+
+  if (req.user.email === userEmail) {
+    additionalInfo.favoritesCount = favorites.length;
+    additionalInfo.followingCount = following.length;
+  }
 
   res.status(200).json({
-    email: user.email,
-    name: user.name,
-    avatar: user.avatar,
-    createdRecipesCount,
-    favoriteRecipesCount,
-    followingCount,
-    followersCount,
+    email,
+    name,
+    avatar,
+    ...additionalInfo,
   });
 };
 
@@ -152,6 +162,72 @@ const unfollowUser = async (req, res) => {
   res.status(200).json({ success: true });
 };
 
+const addFavorite = async (req, res) => {
+  const {
+    user: { _id },
+    params: { id },
+  } = req;
+
+  const isFavorite = await usersServices.findUser({
+    _id,
+    favorites: id,
+  });
+
+  if (isFavorite) {
+    throw HttpError(404, "Recipe has been already added");
+  }
+
+  const updatedUser = await usersServices.updateUser(
+    { _id },
+    { $push: { favorites: id }, $inc: { favoritesCount: 1 } }
+  );
+
+  if (!updatedUser) {
+    throw HttpError(404);
+  }
+
+  res.json(updatedUser);
+};
+
+const deleteFavorite = async (req, res) => {
+  const {
+    user: { _id },
+    params: { id },
+  } = req;
+
+  const isFavoriteAdded = await usersServices.findUser({
+    _id,
+    favorites: id,
+  });
+
+  if (!isFavoriteAdded) {
+    throw HttpError(404, "Recipe hasn't been added yet");
+  }
+
+  const updatedUsers = await usersServices.updateUser(
+    { _id },
+    { $pull: { favorites: id }, $inc: { favoritesCount: -1 } }
+  );
+
+  res.json(updatedUsers);
+};
+
+const getFavorites = async (req, res) => {
+  const { favorites } = req.user;
+  const { page = 1, limit = 20 } = req.query;
+
+  const filter = { _id: { $in: favorites } };
+  const skip = getSkip(page, limit);
+  const options = { skip, limit };
+
+  const favoriteRecipes = await recipesServices.findRecipes({
+    filter,
+    options,
+  });
+
+  res.json(favoriteRecipes);
+};
+
 export default {
   signup: controllerWrapper(signup),
   login: controllerWrapper(login),
@@ -163,4 +239,7 @@ export default {
   getFollowers: controllerWrapper(getFollowers),
   followUser: controllerWrapper(followUser),
   getFollowing: controllerWrapper(getFollowing),
+  addFavorite: controllerWrapper(addFavorite),
+  deleteFavorite: controllerWrapper(deleteFavorite),
+  getFavorites: controllerWrapper(getFavorites),
 };
