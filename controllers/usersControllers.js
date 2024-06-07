@@ -1,4 +1,5 @@
 import * as usersServices from "../services/usersServices.js";
+import * as recipesServices from "../services/recipesServices.js";
 import HttpError from "../helpers/HttpError.js";
 import controllerWrapper from "../decorators/controllerWrapper.js";
 
@@ -57,38 +58,29 @@ const current = async (req, res) => {
 };
 
 const getUserInfo = async (req, res) => {
-  const userId = req.params.userId;
+  const { _id } = req.user;
 
-  const user = await usersServices.findUser({ _id: userId });
+  const user = await usersServices.findUser({ _id });
 
   if (!user) throw HttpError(404, "User not found");
 
-  const createdRecipesCount =
-    (await Recipes.countDocuments({ creator: userId })) || 0;
   const followersCount = user.followers.length;
-
-  let additionalInfo = {
-    createdRecipesCount,
-    followersCount,
-  };
-
-  if (req.user._id.toString() === userId) {
-    // TODO add favorite recipes count
-    // const favoriteRecipesCount = user.followers.length;
-    const followingCount = user.following.length;
-
-    additionalInfo = {
-      ...additionalInfo,
-      // favoriteRecipesCount,
-      followingCount,
-    };
-  }
+  const followingCount = user.following.length;
+  const createdRecipesCount = await recipesServices.countDocuments({
+    owner: _id,
+  });
+  const favoriteRecipesCount = await recipesServices.countDocuments({
+    favoriteByUsers: _id,
+  });
 
   res.status(200).json({
     email: user.email,
     name: user.name,
     avatar: user.avatar,
-    ...additionalInfo,
+    createdRecipesCount,
+    favoriteRecipesCount,
+    followingCount,
+    followersCount,
   });
 };
 

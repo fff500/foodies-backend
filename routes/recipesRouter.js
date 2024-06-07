@@ -12,7 +12,17 @@ recipesRouter.get("/", ctrlRecipes.getFilterdRecipes);
 
 recipesRouter.get("/popular", ctrlRecipes.getPopular);
 
-recipesRouter.get("/:id", isIdValid, ctrlRecipes.findRecipeById);
+recipesRouter.get("/own-recipes", isAuthenticated, ctrlRecipes.getOwnRecipes);
+
+recipesRouter.get("/favorites", isAuthenticated, ctrlRecipes.getFavorites);
+
+recipesRouter.get(
+  "/favorites/total",
+  isAuthenticated,
+  ctrlRecipes.getFavoritesCount
+);
+
+recipesRouter.get("/:id", isIdValid, ctrlRecipes.findRecipe);
 
 recipesRouter.post(
   "/",
@@ -29,13 +39,6 @@ recipesRouter.delete(
   ctrlRecipes.deleteRecipe
 );
 
-recipesRouter.get(
-  "/own-recipes",
-  isAuthenticated,
-  isIdValid,
-  ctrlRecipes.getOwnRecipes
-);
-
 recipesRouter.post(
   "/favorites/:id",
   isAuthenticated,
@@ -48,13 +51,6 @@ recipesRouter.delete(
   isAuthenticated,
   isIdValid,
   ctrlRecipes.deleteFavorite
-);
-
-recipesRouter.get(
-  "/favorites",
-  isAuthenticated,
-  isIdValid,
-  ctrlRecipes.getFavorites
 );
 
 export default recipesRouter;

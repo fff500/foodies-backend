@@ -8,7 +8,7 @@ import areasRouter from "./routes/areasRouter.js";
 import ingredientsRouter from "./routes/ingredientsRouter.js";
 import testimonialsRouter from "./routes/testimonialsRouter.js";
 import categoriesRouter from "./routes/categoriesRouter.js";
-import recipesRouter from './routes/recipesRouter.js';
+import recipesRouter from "./routes/recipesRouter.js";
 
 const { DB_HOST, PORT = 3000 } = process.env;
 

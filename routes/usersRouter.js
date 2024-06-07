@@ -12,7 +12,7 @@ const usersRouter = express.Router();
 usersRouter.get("/following", isAuthenticated, usersControllers.getFollowing);
 usersRouter.get("/followers", isAuthenticated, usersControllers.getFollowers);
 usersRouter.get("/current", isAuthenticated, usersControllers.current);
-usersRouter.get("/:userId", isAuthenticated, usersControllers.getUserInfo);
+usersRouter.get("/", isAuthenticated, usersControllers.getUserInfo);
 
 usersRouter.post(
   "/signup",

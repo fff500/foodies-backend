@@ -55,6 +55,10 @@ const recipesSchema = new Schema(
       ],
       default: [],
     },
+    favoritesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { versionKey: false }
 );

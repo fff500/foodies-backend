@@ -1,7 +1,6 @@
 import HttpError from "../helpers/HttpError.js";
-import ctrlWrapper from "../decorators/controllerWrapper.js";
+import controllerWrapper from "../decorators/controllerWrapper.js";
 import * as recipesServices from "../services/recipesServices.js";
-import Recipe from "../models/Recipe.js";
 
 const getFilterdRecipes = async (req, res) => {
   const {
@@ -29,10 +28,10 @@ const getFilterdRecipes = async (req, res) => {
   res.json(recipes);
 };
 
-const findRecipeById = async (req, res) => {
-  const { id } = req.params;
+const findRecipe = async (req, res) => {
+  const { id: _id } = req.params;
 
-  const recipe = await recipesServices.findById(id);
+  const recipe = await recipesServices.findOne({ _id });
 
   if (!recipe) {
     throw HttpError(404);
@@ -42,19 +41,11 @@ const findRecipeById = async (req, res) => {
 };
 
 const getPopular = async (req, res) => {
-  const filter = { favoriteByUsers: { $exists: true } };
+  const recipes = await recipesServices
+    .getFilteredRecipes({})
+    .sort({ favoritesCount: "desc" });
 
-  // Recipe.aggregate([
-  //   { $addFields: { favoriteByUsersCount: { $size: "favoriteByUsers" } } },
-  // ]);
-
-  const recipes = await recipesServices.getFilteredRecipes({ filter });
-
-  const sortedRecipes = recipes.sort(
-    (a, b) => b.favoriteByUsers.length - a.favoriteByUsers.length
-  );
-
-  res.json(sortedRecipes);
+  res.json(recipes);
 };
 
 const createRecipe = async (req, res) => {
@@ -65,6 +56,9 @@ const createRecipe = async (req, res) => {
   if (!newRecipe) {
     throw HttpError(400);
   }
+
+  newRecipe.favoriteByUsers = undefined;
+  newRecipe.favoritesCount = undefined;
 
   res.status(201).json(newRecipe);
 };
@@ -81,11 +75,11 @@ const deleteRecipe = async (req, res) => {
     throw HttpError(404);
   }
 
-  res.json(deletedRecipe);
+  res.status(204).json({});
 };
 
 const getOwnRecipes = async (req, res) => {
-  const { id: owner } = req.user;
+  const { _id: owner } = req.user;
 
   const recipes = await recipesServices.findRecipes({ owner });
 
@@ -102,15 +96,25 @@ const addFavorite = async (req, res) => {
     params: { id: _id },
   } = req;
 
-  await recipesServices.addToFavorite(
+  const isRecipeAdded = await recipesServices.findOne({
+    _id,
+    favoriteByUsers: userId,
+  });
+
+  if (isRecipeAdded) {
+    throw HttpError(404, "Recipe has been already added");
+  }
+
+  const updatedRecipe = await recipesServices.addToFavorite(
     { _id },
-    { $push: { favoriteByUsers: userId } }
+    { $push: { favoriteByUsers: userId }, $inc: { favoritesCount: 1 } }
   );
 
-  res.json({
-    success: true,
-    message: "Recipe has been added to favorite",
-  });
+  if (!updatedRecipe) {
+    throw HttpError(404);
+  }
+
+  res.json(updatedRecipe);
 };
 
 const deleteFavorite = async (req, res) => {
@@ -119,35 +123,51 @@ const deleteFavorite = async (req, res) => {
     params: { id: _id },
   } = req;
 
-  await recipesServices.addToFavorite(
+  const isRecipeAdded = await recipesServices.findOne({
+    _id,
+    favoriteByUsers: userId,
+  });
+
+  if (!isRecipeAdded) {
+    throw HttpError(404, "Recipe hasn't been added yet");
+  }
+
+  const updatedRecipe = await recipesServices.addToFavorite(
     { _id },
-    { $pull: { favoriteByUsers: userId } }
+    { $pull: { favoriteByUsers: userId }, $inc: { favoritesCount: -1 } }
   );
 
-  res.json({
-    success: true,
-    message: "Recipe has been deleted from favorite",
-  });
+  res.json(updatedRecipe);
 };
 
 const getFavorites = async (req, res) => {
-  const { _id: owner } = req.user;
+  const { _id: favoriteByUsers } = req.user;
 
   const favoriteRecipes = await recipesServices.findRecipes({
-    favoriteByUsers: { $elemMatch: owner },
+    favoriteByUsers,
   });
 
   res.json(favoriteRecipes);
 };
 
+const getFavoritesCount = async (req, res) => {
+  const { _id: favoriteByUsers } = req.user;
+  const total = await recipesServices.countDocuments({
+    favoriteByUsers,
+  });
+
+  res.json({ total });
+};
+
 export default {
-  getFilterdRecipes: ctrlWrapper(getFilterdRecipes),
-  findRecipeById: ctrlWrapper(findRecipeById),
-  getPopular: ctrlWrapper(getPopular),
-  createRecipe: ctrlWrapper(createRecipe),
-  deleteRecipe: ctrlWrapper(deleteRecipe),
-  getOwnRecipes: ctrlWrapper(getOwnRecipes),
-  addFavorite: ctrlWrapper(addFavorite),
-  deleteFavorite: ctrlWrapper(deleteFavorite),
-  getFavorites: ctrlWrapper(getFavorites),
+  getFilterdRecipes: controllerWrapper(getFilterdRecipes),
+  findRecipe: controllerWrapper(findRecipe),
+  getPopular: controllerWrapper(getPopular),
+  createRecipe: controllerWrapper(createRecipe),
+  deleteRecipe: controllerWrapper(deleteRecipe),
+  getOwnRecipes: controllerWrapper(getOwnRecipes),
+  addFavorite: controllerWrapper(addFavorite),
+  deleteFavorite: controllerWrapper(deleteFavorite),
+  getFavorites: controllerWrapper(getFavorites),
+  getFavoritesCount: controllerWrapper(getFavoritesCount),
 };
