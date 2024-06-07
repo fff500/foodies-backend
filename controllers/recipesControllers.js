@@ -1,6 +1,7 @@
 import HttpError from "../helpers/HttpError.js";
 import controllerWrapper from "../decorators/controllerWrapper.js";
 import * as recipesServices from "../services/recipesServices.js";
+import { getSkip } from "../helpers/getSkip.js";
 
 const getFilterdRecipes = async (req, res) => {
   const {
@@ -17,10 +18,10 @@ const getFilterdRecipes = async (req, res) => {
     ...(ingredient ? { ingredients: { $elemMatch: { id: ingredient } } } : {}),
   };
 
-  const skip = (page - 1) * limit;
+  const skip = getSkip(page, limit);
   const options = { skip, limit };
 
-  const recipes = await recipesServices.getFilteredRecipes({
+  const recipes = await recipesServices.findRecipes({
     filter,
     options,
   });
@@ -41,9 +42,12 @@ const findRecipe = async (req, res) => {
 };
 
 const getPopular = async (req, res) => {
-  const recipes = await recipesServices
-    .getFilteredRecipes({})
-    .sort({ favoritesCount: "desc" });
+  const { page = 1, limit = 20 } = req.query;
+
+  const skip = getSkip(page, limit);
+  const options = { skip, limit, sort: { favoritesCount: "desc" } };
+
+  const recipes = await recipesServices.findRecipes({ options });
 
   res.json(recipes);
 };
@@ -80,8 +84,13 @@ const deleteRecipe = async (req, res) => {
 
 const getOwnRecipes = async (req, res) => {
   const { _id: owner } = req.user;
+  const { page = 1, limit = 20 } = req.query;
 
-  const recipes = await recipesServices.findRecipes({ owner });
+  const filter = { owner };
+  const skip = getSkip(page, limit);
+  const options = { skip, limit };
+
+  const recipes = await recipesServices.findRecipes({ filter, options });
 
   if (!recipes.length) {
     throw HttpError(404);
@@ -142,9 +151,15 @@ const deleteFavorite = async (req, res) => {
 
 const getFavorites = async (req, res) => {
   const { _id: favoriteByUsers } = req.user;
+  const { page = 1, limit = 20 } = req.query;
+
+  const filter = { favoriteByUsers };
+  const skip = getSkip(page, limit);
+  const options = { skip, limit };
 
   const favoriteRecipes = await recipesServices.findRecipes({
-    favoriteByUsers,
+    filter,
+    options,
   });
 
   res.json(favoriteRecipes);
