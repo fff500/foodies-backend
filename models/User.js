@@ -31,6 +31,13 @@ const userSchema = new Schema(
       type: [Schema.Types.ObjectId], // assumes an array of users id
       default: [],
     },
+    favorites: {
+      type: [String],
+    },
+    favoritesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { versionKey: false, timestamps: true }
 );
