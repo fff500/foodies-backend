@@ -1,23 +1,24 @@
 import Recipe from "../models/Recipe.js";
 
-const defaultFields = "-favoritesCount";
+const DEFAULT_FIELDS = "-favoritesCount";
 
 export const findRecipes = (search) => {
-  const { filter = {}, fields = defaultFields, options = {} } = search;
+  const { filter = {}, fields = DEFAULT_FIELDS, options = {} } = search;
 
   return Recipe.find(filter, fields, options);
 };
 
-export const findOne = (filter) => Recipe.findOne(filter, defaultFields);
+export const findOne = (filter) => Recipe.findOne(filter, DEFAULT_FIELDS);
 
 export const createRecipe = (data) => Recipe.create(data);
 
 export const deleteRecipe = (filter) =>
-  Recipe.findByIdAndDelete(filter, { fields: defaultFields });
+  Recipe.findByIdAndDelete(filter, { fields: DEFAULT_FIELDS });
 
 export const addToFavorite = (filter, data) =>
   Recipe.findOneAndUpdate(filter, data, {
-    fields: defaultFields,
+    fields: DEFAULT_FIELDS,
   });
+
 export const countDocuments = async (filter) =>
   await Recipe.countDocuments(filter);

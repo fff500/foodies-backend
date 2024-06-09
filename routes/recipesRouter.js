@@ -1,34 +1,39 @@
 import express from "express";
-import ctrlRecipes from "../controllers/recipesControllers.js";
+
+import recipesControllers from "../controllers/recipesControllers.js";
+import { recipesSchema } from "../schemas/recipesSchema.js";
+import validateBody from "../decorators/validateBody.js";
 import isIdValid from "../middlewares/isIdValid.js";
 import isBodyEmpty from "../middlewares/isBodyEmpty.js";
-import validateBody from "../decorators/validateBody.js";
-import { recipesSchema } from "../schemas/recipesSchema.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const recipesRouter = express.Router();
 
-recipesRouter.get("/", ctrlRecipes.getFilterdRecipes);
+recipesRouter.get("/", recipesControllers.getFilterdRecipes);
 
-recipesRouter.get("/popular", ctrlRecipes.getPopular);
+recipesRouter.get("/popular", recipesControllers.getPopular);
 
-recipesRouter.get("/own-recipes", isAuthenticated, ctrlRecipes.getOwnRecipes);
+recipesRouter.get(
+  "/own-recipes",
+  isAuthenticated,
+  recipesControllers.getOwnRecipes
+);
 
-recipesRouter.get("/:id", isIdValid, ctrlRecipes.findRecipe);
+recipesRouter.get("/:id", isIdValid, recipesControllers.findRecipe);
 
 recipesRouter.post(
   "/",
   isAuthenticated,
   isBodyEmpty,
   validateBody(recipesSchema),
-  ctrlRecipes.createRecipe
+  recipesControllers.createRecipe
 );
 
 recipesRouter.delete(
   "/:id",
   isAuthenticated,
   isIdValid,
-  ctrlRecipes.deleteRecipe
+  recipesControllers.deleteRecipe
 );
 
 export default recipesRouter;
