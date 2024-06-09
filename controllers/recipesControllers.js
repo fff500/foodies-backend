@@ -1,7 +1,7 @@
 import HttpError from "../helpers/HttpError.js";
+import { getSkip } from "../helpers/getSkip.js";
 import controllerWrapper from "../decorators/controllerWrapper.js";
 import * as recipesServices from "../services/recipesServices.js";
-import { getSkip } from "../helpers/getSkip.js";
 
 const getFilterdRecipes = async (req, res) => {
   const {
