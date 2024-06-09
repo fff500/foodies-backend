@@ -5,7 +5,6 @@ import controllerWrapper from "../decorators/controllerWrapper.js";
 import { getSkip } from "../helpers/getSkip.js";
 import validatePassword from "../helpers/validatePassword.js";
 import { createToken } from "../helpers/jwt.js";
-import Recipe from "../models/Recipe.js";
 
 const signup = async (req, res) => {
   const user = await usersServices.findUser({ email: req.body.email });
