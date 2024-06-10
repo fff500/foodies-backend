@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 
 import { handleSaveError, setUpdateSettings } from "./hooks.js";
+import { EMAIL_REGEXP } from "../constants/users.js";
 
 const userSchema = new Schema(
   {
@@ -11,6 +12,7 @@ const userSchema = new Schema(
     email: {
       type: String,
       required: [true, "Email is required"],
+      match: EMAIL_REGEXP,
       unique: true,
     },
     token: {
@@ -33,10 +35,6 @@ const userSchema = new Schema(
     },
     favorites: {
       type: [String],
-    },
-    favoritesCount: {
-      type: Number,
-      default: 0,
     },
   },
   { versionKey: false, timestamps: true }

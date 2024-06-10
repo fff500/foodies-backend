@@ -3,7 +3,7 @@ import controllerWrapper from "../decorators/controllerWrapper.js";
 
 const getTestimonials = async (req, res) => {
   const testimonials = await testimonialsServices.findTestimonials();
-  res.status(200).json(testimonials);
+  res.json(testimonials);
 };
 
 export default {
