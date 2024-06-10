@@ -3,7 +3,7 @@ import controllerWrapper from "../decorators/controllerWrapper.js";
 
 const getIngredients = async (req, res) => {
   const ingredients = await ingredientsServices.findIngredients();
-  res.status(200).json(ingredients);
+  res.json(ingredients);
 };
 
 export default {

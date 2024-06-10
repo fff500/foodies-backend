@@ -13,7 +13,7 @@ const signup = async (req, res) => {
 
   const newUser = await usersServices.saveUser(req.body);
 
-  res.status(200).json({
+  res.status(201).json({
     user: {
       email: newUser.email,
     },
@@ -40,7 +40,7 @@ const login = async (req, res) => {
     { token }
   );
 
-  res.status(200).json({
+  res.json({
     user: {
       email: updatedUser.email,
       token: updatedUser.token,
@@ -51,7 +51,7 @@ const login = async (req, res) => {
 const current = async (req, res) => {
   const { email, name, avatar, favorites, favoritesCount } = req.user;
 
-  res.status(200).json({
+  res.json({
     user: {
       email,
       name,
@@ -86,7 +86,7 @@ const getUserInfo = async (req, res) => {
     additionalInfo.followingCount = following.length;
   }
 
-  res.status(200).json({
+  res.json({
     email,
     name,
     avatar,
@@ -105,7 +105,7 @@ const updateAvatar = async (req, res) => {
     { avatar: newPath }
   );
 
-  res.status(200).json({
+  res.json({
     avatar: updatedUser.avatar,
   });
 };
@@ -121,13 +121,13 @@ const logout = async (req, res) => {
 const getFollowers = async (req, res) => {
   const { followers } = req.user;
 
-  res.status(200).json({ followers });
+  res.json({ followers });
 };
 
 const getFollowing = async (req, res) => {
   const { following } = req.user;
 
-  res.status(200).json({ following });
+  res.json({ following });
 };
 
 const followUser = async (req, res) => {
@@ -143,7 +143,7 @@ const followUser = async (req, res) => {
     { $push: { followers: req.user._id } }
   );
 
-  res.status(200).json({ success: true });
+  res.json({ success: true });
 };
 
 const unfollowUser = async (req, res) => {
@@ -159,7 +159,7 @@ const unfollowUser = async (req, res) => {
     { $pull: { followers: req.user._id } }
   );
 
-  res.status(200).json({ success: true });
+  res.json({ success: true });
 };
 
 const addFavorite = async (req, res) => {
@@ -179,7 +179,7 @@ const addFavorite = async (req, res) => {
 
   const updatedUser = await usersServices.updateUser(
     { _id },
-    { $push: { favorites: id }, $inc: { favoritesCount: 1 } }
+    { $push: { favorites: id } }
   );
 
   await recipesServices.addToFavorite(
@@ -211,7 +211,7 @@ const deleteFavorite = async (req, res) => {
 
   const updatedUsers = await usersServices.updateUser(
     { _id },
-    { $pull: { favorites: id }, $inc: { favoritesCount: -1 } }
+    { $pull: { favorites: id } }
   );
 
   await recipesServices.addToFavorite(
