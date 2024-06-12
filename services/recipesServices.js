@@ -6,7 +6,7 @@ const DEFAULT_FIELDS = "-favoritesCount";
 export const findRecipes = (search) => {
   const { filter = {}, fields = DEFAULT_FIELDS, options = {} } = search;
 
-  return Recipe.find(filter, fields, options);
+  return Recipe.find(filter, fields, options).populate("owner");
 };
 
 export const findOne = async ({ _id }) => {
