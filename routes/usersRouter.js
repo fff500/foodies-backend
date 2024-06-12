@@ -15,7 +15,7 @@ usersRouter.get("/following", isAuthenticated, usersControllers.getFollowing);
 usersRouter.get("/followers", isAuthenticated, usersControllers.getFollowers);
 usersRouter.get("/current", isAuthenticated, usersControllers.current);
 usersRouter.get("/favorites", isAuthenticated, usersControllers.getFavorites);
-usersRouter.get("/:email", isAuthenticated, usersControllers.getUserInfo);
+usersRouter.get("/:id", isAuthenticated, usersControllers.getUserInfo);
 
 usersRouter.post(
   "/favorites/:id",
