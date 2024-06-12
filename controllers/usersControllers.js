@@ -282,12 +282,22 @@ const getFavorites = async (req, res) => {
   const skip = getSkip(page, limit);
   const options = { skip, limit };
 
-  const favoriteRecipes = await recipesServices.findRecipes({
+  const recipes = await recipesServices.findRecipes({
     filter,
     options,
   });
 
-  res.json(favoriteRecipes);
+  const totalCount = await recipesServices.countDocuments(filter);
+
+  if (!recipes.length) {
+    throw HttpError(404);
+  }
+
+  res.json({
+    totalCount,
+    page,
+    recipes,
+  });
 };
 
 export default {
