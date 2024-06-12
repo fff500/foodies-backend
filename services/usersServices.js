@@ -21,7 +21,7 @@ export const saveUser = async (data) => {
 
 export const updateUser = (filter, data) => User.findOneAndUpdate(filter, data);
 
-export async function updateAvatar(originalPath, originalName) {
+export const updateAvatar = async (originalPath, originalName) => {
   const newPath = path.resolve("public/avatars", originalName);
 
   await jimp
@@ -35,4 +35,4 @@ export async function updateAvatar(originalPath, originalName) {
     });
 
   return newPath;
-}
+};

@@ -3,7 +3,7 @@ import { getSkip } from "../helpers/getSkip.js";
 import controllerWrapper from "../decorators/controllerWrapper.js";
 import * as recipesServices from "../services/recipesServices.js";
 
-const getFilterdRecipes = async (req, res) => {
+const getFilteredRecipes = async (req, res) => {
   const {
     page = 1,
     limit = 20,
@@ -99,7 +99,7 @@ const getOwnRecipes = async (req, res) => {
 };
 
 export default {
-  getFilterdRecipes: controllerWrapper(getFilterdRecipes),
+  getFilteredRecipes: controllerWrapper(getFilteredRecipes),
   findRecipe: controllerWrapper(findRecipe),
   getPopular: controllerWrapper(getPopular),
   createRecipe: controllerWrapper(createRecipe),
