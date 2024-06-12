@@ -10,11 +10,13 @@ const getFilterdRecipes = async (req, res) => {
     category = "",
     area = "",
     ingredient = "",
+    owner = "",
   } = req.query;
 
   const filter = {
     ...(category ? { category } : {}),
     ...(area ? { area } : {}),
+    ...(owner ? { owner } : {}),
     ...(ingredient ? { ingredients: { $elemMatch: { id: ingredient } } } : {}),
   };
 
@@ -26,7 +28,17 @@ const getFilterdRecipes = async (req, res) => {
     options,
   });
 
-  res.json(recipes);
+  const totalCount = await recipesServices.countDocuments(filter);
+
+  if (!recipes.length) {
+    throw HttpError(404);
+  }
+
+  res.json({
+    totalCount,
+    page,
+    recipes,
+  });
 };
 
 const findRecipe = async (req, res) => {
@@ -91,11 +103,17 @@ const getOwnRecipes = async (req, res) => {
 
   const recipes = await recipesServices.findRecipes({ filter, options });
 
+  const totalCount = await recipesServices.countDocuments(filter);
+
   if (!recipes.length) {
     throw HttpError(404);
   }
 
-  res.json(recipes);
+  res.json({
+    totalCount,
+    page,
+    recipes,
+  });
 };
 
 export default {
