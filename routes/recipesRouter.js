@@ -9,7 +9,7 @@ import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const recipesRouter = express.Router();
 
-recipesRouter.get("/", recipesControllers.getFilterdRecipes);
+recipesRouter.get("/", recipesControllers.getFilteredRecipes);
 
 recipesRouter.get("/popular", recipesControllers.getPopular);
 
