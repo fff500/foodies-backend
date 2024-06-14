@@ -30,10 +30,6 @@ const getFilteredRecipes = async (req, res) => {
 
   const totalCount = await recipesServices.countDocuments(filter);
 
-  if (!recipes.length) {
-    throw HttpError(404);
-  }
-
   res.json({
     totalCount,
     page,
