@@ -128,66 +128,51 @@ const getFollowers = async (req, res) => {
   const { userId } = req.params;
 
   const user = await usersServices.findUser({ _id: userId });
+  const followers = await usersServices.findUsersByIds(user.followers);
 
-  const followersData = await Promise.all(
-    user.followers.map(async (id) => {
-      let user = await usersServices.findUser({ _id: id });
-      if (!user) throw HttpError(404, "User not found");
+  const followersData = [];
 
-      const { followers, email, name, avatar, _id } = user;
+  for (const follower of followers) {
+    const { email, name, avatar, _id, followers: followerIds } = follower;
 
-      const createdRecipesCount = await recipesServices.countDocuments({
-        owner: user._id,
-      });
-      const followersCount = followers.length;
+    const createdRecipesCount = await recipesServices.countDocuments({
+      owner: _id,
+    });
 
-      const additionalInfo = {
-        createdRecipesCount,
-        followersCount,
-      };
-
-      return {
-        email,
-        name,
-        avatar,
-        _id,
-        ...additionalInfo,
-      };
-    })
-  );
+    followersData.push({
+      email,
+      name,
+      avatar,
+      _id,
+      createdRecipesCount,
+      followersCount: followerIds.length,
+    });
+  }
 
   res.json({ followersData });
 };
 
 const getFollowersCurrent = async (req, res) => {
-  const { followers } = req.user;
+  const followers = await usersServices.findUsersByIds(req.user.followers);
 
-  const followersData = await Promise.all(
-    followers.map(async (id) => {
-      let user = await usersServices.findUser({ _id: id });
-      if (!user) throw HttpError(404, "User not found");
+  const followersData = [];
 
-      const { followers, email, name, avatar, _id } = user;
+  for (const follower of followers) {
+    const { email, name, avatar, _id, followers: followerFollowers } = follower;
 
-      const createdRecipesCount = await recipesServices.countDocuments({
-        owner: user._id,
-      });
-      const followersCount = followers.length;
+    const createdRecipesCount = await recipesServices.countDocuments({
+      owner: _id,
+    });
 
-      const additionalInfo = {
-        createdRecipesCount,
-        followersCount,
-      };
-
-      return {
-        email,
-        name,
-        avatar,
-        _id,
-        ...additionalInfo,
-      };
-    })
-  );
+    followersData.push({
+      email,
+      name,
+      avatar,
+      _id,
+      createdRecipesCount,
+      followersCount: followerFollowers.length,
+    });
+  }
 
   res.json({ followersData });
 };
