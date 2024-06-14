@@ -66,6 +66,7 @@ const current = async (req, res) => {
     following,
     favorites,
     createdRecipesCount,
+    _id,
   });
 };
 
