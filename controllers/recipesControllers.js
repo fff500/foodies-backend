@@ -2,6 +2,9 @@ import HttpError from "../helpers/HttpError.js";
 import { getSkip } from "../helpers/getSkip.js";
 import controllerWrapper from "../decorators/controllerWrapper.js";
 import * as recipesServices from "../services/recipesServices.js";
+import path from "path";
+import fs from "fs/promises";
+import resizeThumb from "../helpers/resizeThumb.js";
 
 const getFilterdRecipes = async (req, res) => {
   const {
@@ -29,6 +32,40 @@ const getFilterdRecipes = async (req, res) => {
   res.json(recipes);
 };
 
+export const createRecipe = async (req, res) => {
+  const { _id: owner } = req.user;
+
+  if (!req.file) {
+    throw HttpError(404, "Image file is required");
+  }
+
+  const { path: oldPath, filename } = req.file;
+
+  const thumbPath = path.resolve("public", "recipes");
+
+  const newPath = path.join(thumbPath, filename);
+
+  await fs.rename(oldPath, newPath);
+
+  const thumbURL = path.join("recipes", filename);
+
+  resizeThumb(thumbURL, newPath);
+
+  const data = JSON.parse(req.body.json);
+
+  const newRecipe = await recipesServices.createRecipe({
+    ...data,
+    owner,
+    thumb: thumbURL,
+  });
+
+  if (!newRecipe) {
+    throw HttpError(400);
+  }
+
+  res.status(201).json(newRecipe);
+};
+
 const findRecipe = async (req, res) => {
   const { id: _id } = req.params;
 
@@ -50,20 +87,6 @@ const getPopular = async (req, res) => {
   const recipes = await recipesServices.findRecipes({ options });
 
   res.json(recipes);
-};
-
-const createRecipe = async (req, res) => {
-  const { _id: owner } = req.user;
-
-  const newRecipe = await recipesServices.createRecipe({ ...req.body, owner });
-
-  if (!newRecipe) {
-    throw HttpError(400);
-  }
-
-  newRecipe.favoritesCount = undefined;
-
-  res.status(201).json(newRecipe);
 };
 
 const deleteRecipe = async (req, res) => {

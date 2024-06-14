@@ -6,7 +6,7 @@ export const recipesSchema = Joi.object({
   area: Joi.string().required(),
   instructions: Joi.string(),
   description: Joi.string(),
-  thumb: Joi.string(),
+  thumb: Joi.object(),
   time: Joi.string(),
   ingredients: Joi.array().items(
     Joi.object({
@@ -14,5 +14,4 @@ export const recipesSchema = Joi.object({
       measure: Joi.string(),
     })
   ),
-  owner: Joi.string().required(),
 });
