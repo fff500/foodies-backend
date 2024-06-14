@@ -12,10 +12,19 @@ import isIdValid from "../middlewares/isIdValid.js";
 const usersRouter = express.Router();
 
 usersRouter.get("/following", isAuthenticated, usersControllers.getFollowing);
-usersRouter.get("/followers", isAuthenticated, usersControllers.getFollowers);
+usersRouter.get(
+  "/followers",
+  isAuthenticated,
+  usersControllers.getFollowersCurrent
+);
+usersRouter.get(
+  "/followers/:userId",
+  isAuthenticated,
+  usersControllers.getFollowers
+);
 usersRouter.get("/current", isAuthenticated, usersControllers.current);
 usersRouter.get("/favorites", isAuthenticated, usersControllers.getFavorites);
-usersRouter.get("/:email", isAuthenticated, usersControllers.getUserInfo);
+usersRouter.get("/:id", isAuthenticated, usersControllers.getUserInfo);
 
 usersRouter.post(
   "/favorites/:id",
@@ -60,7 +69,7 @@ usersRouter.patch(
   usersControllers.followUser
 );
 
-usersRouter.patch(
+usersRouter.delete(
   "/unfollow/:userId",
   isAuthenticated,
   usersControllers.unfollowUser

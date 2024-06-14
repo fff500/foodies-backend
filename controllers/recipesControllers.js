@@ -6,18 +6,20 @@ import path from "path";
 import fs from "fs/promises";
 import resizeThumb from "../helpers/resizeThumb.js";
 
-const getFilterdRecipes = async (req, res) => {
+const getFilteredRecipes = async (req, res) => {
   const {
     page = 1,
     limit = 20,
     category = "",
     area = "",
     ingredient = "",
+    owner = "",
   } = req.query;
 
   const filter = {
     ...(category ? { category } : {}),
     ...(area ? { area } : {}),
+    ...(owner ? { owner } : {}),
     ...(ingredient ? { ingredients: { $elemMatch: { id: ingredient } } } : {}),
   };
 
@@ -29,7 +31,13 @@ const getFilterdRecipes = async (req, res) => {
     options,
   });
 
-  res.json(recipes);
+  const totalCount = await recipesServices.countDocuments(filter);
+
+  res.json({
+    totalCount,
+    page,
+    recipes,
+  });
 };
 
 export const createRecipe = async (req, res) => {
@@ -114,15 +122,17 @@ const getOwnRecipes = async (req, res) => {
 
   const recipes = await recipesServices.findRecipes({ filter, options });
 
-  if (!recipes.length) {
-    throw HttpError(404);
-  }
+  const totalCount = await recipesServices.countDocuments(filter);
 
-  res.json(recipes);
+  res.json({
+    totalCount,
+    page,
+    recipes,
+  });
 };
 
 export default {
-  getFilterdRecipes: controllerWrapper(getFilterdRecipes),
+  getFilteredRecipes: controllerWrapper(getFilteredRecipes),
   findRecipe: controllerWrapper(findRecipe),
   getPopular: controllerWrapper(getPopular),
   createRecipe: controllerWrapper(createRecipe),

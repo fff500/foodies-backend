@@ -44,53 +44,51 @@ const login = async (req, res) => {
     user: {
       email: updatedUser.email,
       token: updatedUser.token,
+      name: updatedUser.name,
+      avatar: updatedUser.avatar,
     },
   });
 };
 
 const current = async (req, res) => {
-  const { email, name, avatar, favorites, favoritesCount } = req.user;
-
-  res.json({
-    user: {
-      email,
-      name,
-      avatar,
-      favorites,
-      favoritesCount,
-    },
-  });
-};
-
-const getUserInfo = async (req, res) => {
-  const { email: userEmail } = req.params;
-
-  const user = await usersServices.findUser({ email: userEmail });
-
-  if (!user) throw HttpError(404, "User not found");
-
-  const { followers, following, favorites, email, name, avatar } = user;
+  const { followers, following, favorites, email, name, avatar, _id } =
+    req.user;
 
   const createdRecipesCount = await recipesServices.countDocuments({
-    owner: user._id,
+    owner: _id,
   });
-  const followersCount = followers.length;
-
-  const additionalInfo = {
-    createdRecipesCount,
-    followersCount,
-  };
-
-  if (req.user.email === userEmail) {
-    additionalInfo.favoritesCount = favorites.length;
-    additionalInfo.followingCount = following.length;
-  }
 
   res.json({
     email,
     name,
     avatar,
-    ...additionalInfo,
+    followers,
+    following,
+    favorites,
+    createdRecipesCount,
+    _id,
+  });
+};
+
+const getUserInfo = async (req, res) => {
+  const { id } = req.params;
+
+  const user = await usersServices.findUser({ _id: id });
+
+  if (!user) throw HttpError(404, "User not found");
+
+  const { followers, email, name, avatar } = user;
+
+  const createdRecipesCount = await recipesServices.countDocuments({
+    owner: user._id,
+  });
+
+  res.json({
+    email,
+    name,
+    avatar,
+    followers,
+    createdRecipesCount,
   });
 };
 
@@ -119,22 +117,96 @@ const logout = async (req, res) => {
 };
 
 const getFollowers = async (req, res) => {
-  const { followers } = req.user;
+  const { userId } = req.params;
 
-  res.json({ followers });
+  const user = await usersServices.findUser({ _id: userId });
+  const followers = await usersServices.findUsersByIds(user.followers);
+
+  const followersData = [];
+
+  for (const follower of followers) {
+    const { email, name, avatar, _id, followers: followerIds } = follower;
+
+    const createdRecipesCount = await recipesServices.countDocuments({
+      owner: _id,
+    });
+
+    followersData.push({
+      email,
+      name,
+      avatar,
+      _id,
+      createdRecipesCount,
+      followersCount: followerIds.length,
+    });
+  }
+
+  res.json({ followersData });
+};
+
+const getFollowersCurrent = async (req, res) => {
+  const followers = await usersServices.findUsersByIds(req.user.followers);
+
+  const followersData = [];
+
+  for (const follower of followers) {
+    const { email, name, avatar, _id, followers: followerFollowers } = follower;
+
+    const createdRecipesCount = await recipesServices.countDocuments({
+      owner: _id,
+    });
+
+    followersData.push({
+      email,
+      name,
+      avatar,
+      _id,
+      createdRecipesCount,
+      followersCount: followerFollowers.length,
+    });
+  }
+
+  res.json({ followersData });
 };
 
 const getFollowing = async (req, res) => {
   const { following } = req.user;
 
-  res.json({ following });
+  const followingData = await Promise.all(
+    following.map(async (id) => {
+      let user = await usersServices.findUser({ _id: id });
+      if (!user) throw HttpError(404, "User not found");
+
+      const { followers, email, name, avatar, _id } = user;
+
+      const createdRecipesCount = await recipesServices.countDocuments({
+        owner: user._id,
+      });
+      const followersCount = followers.length;
+
+      const additionalInfo = {
+        createdRecipesCount,
+        followersCount,
+      };
+
+      return {
+        email,
+        name,
+        avatar,
+        _id,
+        ...additionalInfo,
+      };
+    })
+  );
+
+  res.json({ followingData });
 };
 
 const followUser = async (req, res) => {
   const userToFollowId = req.params.userId;
 
   await usersServices.updateUser(
-    { _id: req.user.id },
+    { _id: req.user._id },
     { $push: { following: userToFollowId } }
   );
 
@@ -150,7 +222,7 @@ const unfollowUser = async (req, res) => {
   const userToUnfollowId = req.params.userId;
 
   await usersServices.updateUser(
-    { _id: req.user.id },
+    { _id: req.user._id },
     { $pull: { following: userToUnfollowId } }
   );
 
@@ -230,12 +302,18 @@ const getFavorites = async (req, res) => {
   const skip = getSkip(page, limit);
   const options = { skip, limit };
 
-  const favoriteRecipes = await recipesServices.findRecipes({
+  const recipes = await recipesServices.findRecipes({
     filter,
     options,
   });
 
-  res.json(favoriteRecipes);
+  const totalCount = await recipesServices.countDocuments(filter);
+
+  res.json({
+    totalCount,
+    page,
+    recipes,
+  });
 };
 
 export default {
@@ -246,6 +324,7 @@ export default {
   updateAvatar: controllerWrapper(updateAvatar),
   logout: controllerWrapper(logout),
   unfollowUser: controllerWrapper(unfollowUser),
+  getFollowersCurrent: controllerWrapper(getFollowersCurrent),
   getFollowers: controllerWrapper(getFollowers),
   followUser: controllerWrapper(followUser),
   getFollowing: controllerWrapper(getFollowing),

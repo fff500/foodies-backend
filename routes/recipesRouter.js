@@ -10,7 +10,7 @@ import upload from "../middlewares/upload.js";
 
 const recipesRouter = express.Router();
 
-recipesRouter.get("/", recipesControllers.getFilterdRecipes);
+recipesRouter.get("/", recipesControllers.getFilteredRecipes);
 
 recipesRouter.get("/popular", recipesControllers.getPopular);
 

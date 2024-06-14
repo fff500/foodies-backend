@@ -26,15 +26,16 @@ const userSchema = new Schema(
       type: String,
     },
     followers: {
-      type: [Schema.Types.ObjectId], // assumes an array of users id
+      type: [String],
       default: [],
     },
     following: {
-      type: [Schema.Types.ObjectId], // assumes an array of users id
+      type: [String],
       default: [],
     },
     favorites: {
       type: [String],
+      default: [],
     },
   },
   { versionKey: false, timestamps: true }
