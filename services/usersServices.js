@@ -5,6 +5,12 @@ import path from "path";
 
 import User from "../models/User.js";
 
+export const findUsersByIds = function (ids) {
+  return User.find({
+    _id: { $in: ids },
+  });
+};
+
 export const findUser = (filter) => User.findOne(filter);
 
 export const saveUser = async (data) => {

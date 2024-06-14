@@ -44,21 +44,34 @@ const login = async (req, res) => {
     user: {
       email: updatedUser.email,
       token: updatedUser.token,
+      name: updatedUser.name,
+      avatar: updatedUser.avatar,
     },
   });
 };
 
 const current = async (req, res) => {
-  const { email, name, avatar, favorites, favoritesCount } = req.user;
+  const { followers, following, favorites, email, name, avatar, _id } =
+    req.user;
+
+  const createdRecipesCount = await recipesServices.countDocuments({
+    owner: _id,
+  });
+  const followersCount = followers.length;
+
+  const additionalInfo = {
+    createdRecipesCount,
+    followersCount,
+  };
+
+  additionalInfo.favoritesCount = favorites.length;
+  additionalInfo.followingCount = following.length;
 
   res.json({
-    user: {
-      email,
-      name,
-      avatar,
-      favorites,
-      favoritesCount,
-    },
+    email,
+    name,
+    avatar,
+    ...additionalInfo,
   });
 };
 
@@ -69,7 +82,7 @@ const getUserInfo = async (req, res) => {
 
   if (!user) throw HttpError(404, "User not found");
 
-  const { followers, following, favorites, email, name, avatar } = user;
+  const { followers, email, name, avatar } = user;
 
   const createdRecipesCount = await recipesServices.countDocuments({
     owner: user._id,
@@ -80,11 +93,6 @@ const getUserInfo = async (req, res) => {
     createdRecipesCount,
     followersCount,
   };
-
-  if (req.user._id === id) {
-    additionalInfo.favoritesCount = favorites.length;
-    additionalInfo.followingCount = following.length;
-  }
 
   res.json({
     email,
@@ -119,33 +127,54 @@ const logout = async (req, res) => {
 };
 
 const getFollowers = async (req, res) => {
-  const { followers } = req.user;
+  const { userId } = req.params;
 
-  const followersData = await Promise.all(
-    followers.map(async (id) => {
-      let user = await usersServices.findUser({ _id: id });
-      if (!user) throw HttpError(404, "User not found");
+  const user = await usersServices.findUser({ _id: userId });
+  const followers = await usersServices.findUsersByIds(user.followers);
 
-      const { followers, email, name, avatar } = user;
+  const followersData = [];
 
-      const createdRecipesCount = await recipesServices.countDocuments({
-        owner: user._id,
-      });
-      const followersCount = followers.length;
+  for (const follower of followers) {
+    const { email, name, avatar, _id, followers: followerIds } = follower;
 
-      const additionalInfo = {
-        createdRecipesCount,
-        followersCount,
-      };
+    const createdRecipesCount = await recipesServices.countDocuments({
+      owner: _id,
+    });
 
-      return {
-        email,
-        name,
-        avatar,
-        ...additionalInfo,
-      };
-    })
-  );
+    followersData.push({
+      email,
+      name,
+      avatar,
+      _id,
+      createdRecipesCount,
+      followersCount: followerIds.length,
+    });
+  }
+
+  res.json({ followersData });
+};
+
+const getFollowersCurrent = async (req, res) => {
+  const followers = await usersServices.findUsersByIds(req.user.followers);
+
+  const followersData = [];
+
+  for (const follower of followers) {
+    const { email, name, avatar, _id, followers: followerFollowers } = follower;
+
+    const createdRecipesCount = await recipesServices.countDocuments({
+      owner: _id,
+    });
+
+    followersData.push({
+      email,
+      name,
+      avatar,
+      _id,
+      createdRecipesCount,
+      followersCount: followerFollowers.length,
+    });
+  }
 
   res.json({ followersData });
 };
@@ -158,7 +187,7 @@ const getFollowing = async (req, res) => {
       let user = await usersServices.findUser({ _id: id });
       if (!user) throw HttpError(404, "User not found");
 
-      const { followers, email, name, avatar } = user;
+      const { followers, email, name, avatar, _id } = user;
 
       const createdRecipesCount = await recipesServices.countDocuments({
         owner: user._id,
@@ -174,6 +203,7 @@ const getFollowing = async (req, res) => {
         email,
         name,
         avatar,
+        _id,
         ...additionalInfo,
       };
     })
@@ -186,7 +216,7 @@ const followUser = async (req, res) => {
   const userToFollowId = req.params.userId;
 
   await usersServices.updateUser(
-    { _id: req.user.id },
+    { _id: req.user._id },
     { $push: { following: userToFollowId } }
   );
 
@@ -202,7 +232,7 @@ const unfollowUser = async (req, res) => {
   const userToUnfollowId = req.params.userId;
 
   await usersServices.updateUser(
-    { _id: req.user.id },
+    { _id: req.user._id },
     { $pull: { following: userToUnfollowId } }
   );
 
@@ -289,10 +319,6 @@ const getFavorites = async (req, res) => {
 
   const totalCount = await recipesServices.countDocuments(filter);
 
-  if (!recipes.length) {
-    throw HttpError(404);
-  }
-
   res.json({
     totalCount,
     page,
@@ -308,6 +334,7 @@ export default {
   updateAvatar: controllerWrapper(updateAvatar),
   logout: controllerWrapper(logout),
   unfollowUser: controllerWrapper(unfollowUser),
+  getFollowersCurrent: controllerWrapper(getFollowersCurrent),
   getFollowers: controllerWrapper(getFollowers),
   followUser: controllerWrapper(followUser),
   getFollowing: controllerWrapper(getFollowing),
