@@ -35,6 +35,7 @@ const userSchema = new Schema(
     },
     favorites: {
       type: [String],
+      default: [],
     },
   },
   { versionKey: false, timestamps: true }

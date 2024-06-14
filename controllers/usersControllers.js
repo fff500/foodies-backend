@@ -57,21 +57,15 @@ const current = async (req, res) => {
   const createdRecipesCount = await recipesServices.countDocuments({
     owner: _id,
   });
-  const followersCount = followers.length;
-
-  const additionalInfo = {
-    createdRecipesCount,
-    followersCount,
-  };
-
-  additionalInfo.favoritesCount = favorites.length;
-  additionalInfo.followingCount = following.length;
 
   res.json({
     email,
     name,
     avatar,
-    ...additionalInfo,
+    followers,
+    following,
+    favorites,
+    createdRecipesCount,
   });
 };
 
@@ -87,18 +81,13 @@ const getUserInfo = async (req, res) => {
   const createdRecipesCount = await recipesServices.countDocuments({
     owner: user._id,
   });
-  const followersCount = followers.length;
-
-  const additionalInfo = {
-    createdRecipesCount,
-    followersCount,
-  };
 
   res.json({
     email,
     name,
     avatar,
-    ...additionalInfo,
+    followers,
+    createdRecipesCount,
   });
 };
 
