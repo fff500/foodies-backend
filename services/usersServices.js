@@ -41,6 +41,6 @@ export const updateAvatar = async (originalPath, originalName) => {
       throw new Error("Error resizing avatar");
     });
 
-  const newPath = path.join("/avatars", originalName);
+  const newPath = path.join("avatars", originalName);
   return newPath;
 };
