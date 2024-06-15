@@ -28,17 +28,19 @@ export const saveUser = async (data) => {
 export const updateUser = (filter, data) => User.findOneAndUpdate(filter, data);
 
 export const updateAvatar = async (originalPath, originalName) => {
-  const newPath = path.resolve("public/avatars", originalName);
+  const relativePath = "public/avatars";
+  const absolutePath = path.resolve(relativePath, originalName);
 
   await jimp
     .read(originalPath)
     .then((image) => {
-      return image.resize(250, 250).write(newPath);
+      return image.resize(250, 250).write(absolutePath);
     })
     .catch((err) => {
       console.error("Error resizing avatar:", err.message);
       throw new Error("Error resizing avatar");
     });
 
+  const newPath = path.join("/avatars", originalName);
   return newPath;
 };
