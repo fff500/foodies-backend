@@ -6,6 +6,7 @@ import validateBody from "../decorators/validateBody.js";
 import isIdValid from "../middlewares/isIdValid.js";
 import isBodyEmpty from "../middlewares/isBodyEmpty.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
+import upload from "../middlewares/upload.js";
 
 const recipesRouter = express.Router();
 
@@ -24,8 +25,7 @@ recipesRouter.get("/:id", isIdValid, recipesControllers.findRecipe);
 recipesRouter.post(
   "/",
   isAuthenticated,
-  isBodyEmpty,
-  validateBody(recipesSchema),
+  upload.single("image"),
   recipesControllers.createRecipe
 );
 
