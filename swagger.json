@@ -1,0 +1,1744 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.0",
+    "title": "foodies/api-docs",
+    "description": "Showing api-docs",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "servers": [{ "url": "https://foodies-backend-ez4l.onrender.com" }],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Users endpoints"
+    },
+    {
+      "name": "Recipes",
+      "description": "Recipes endpoints"
+    },
+    {
+      "name": "Areas",
+      "description": "Areas endpoint"
+    },
+    {
+      "name": "Ingredients",
+      "description": "Ingredients endpoint"
+    },
+    {
+      "name": "Testimonials",
+      "description": "Testimonials endpoint"
+    },
+    {
+      "name": "Categories",
+      "description": "Categories endpoint"
+    }
+  ],
+  "paths": {
+    "/api/users/signup": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "User registration",
+        "requestBody": {
+          "description": "Registration's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "User authontication",
+        "requestBody": {
+          "description": "Authorisation's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthonticationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthonticationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          },
+          "409": {
+            "description": "Email or password has already exists",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "User logout",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "204": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignOutResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/current": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Get current user",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/:email": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user details",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "email",
+            "required": true,
+            "type": "string",
+            "description": "Email of user"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/favorites": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user favorite recipe list",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Specific page",
+            "required": false,
+            "default": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit recipes on page",
+            "required": false,
+            "default": 20,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFavoritesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/favorites/:id": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Add recipe to favorites list",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAddFavoriteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete recipe from favorite list",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAddFavoriteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/avatars": {
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Add new avatar of user",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          }
+        ],
+        "requestBody": {
+          "description": "User avatar image",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAvatarRequest"
+              }
+            }
+          }
+        },
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAvatarResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/following": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user following",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFollowingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/followers": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user followers",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFollowingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/followers/:userId": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get followers by user",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFollowingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/follow/:userId": {
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Get follow user",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFollowingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/users/unfollow/:userId": {
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Get follow user",
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFollowingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/areas": {
+      "get": {
+        "tags": ["Areas"],
+        "summary": "Get areas",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AreasResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/ingredients": {
+      "get": {
+        "tags": ["Ingredients"],
+        "summary": "Get ingredients",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngredientsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/testimonials": {
+      "get": {
+        "tags": ["Testimonials"],
+        "summary": "Get testimonials",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestimonialsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get categories",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Specific page",
+            "required": false,
+            "default": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit recipes on page",
+            "required": false,
+            "default": 11,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/recipes": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Get recipes",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "area",
+            "in": "query",
+            "description": "Filter by area",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ingredient",
+            "in": "query",
+            "description": "Filter by ingredient",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "description": "Filter by owner",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Specific page",
+            "required": false,
+            "default": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit recipes on page",
+            "required": false,
+            "default": 20,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      },
+      "post": {
+        "tags": ["Recipes"],
+        "summary": "Create recipe",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          }
+        ],
+        "requestBody": {
+          "description": "Recipe create object",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecipeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeCreateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/recipes/popular": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Get popular recipes",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Specific page",
+            "required": false,
+            "default": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit recipes on page",
+            "required": false,
+            "default": 20,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/recipes/own-recipes": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Get own recipes",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Specific page",
+            "required": false,
+            "default": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit recipes on page",
+            "required": false,
+            "default": 20,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/recipes/:id": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Get recipe by id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Recipes"],
+        "summary": "Delete recipe",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "in": "headers",
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "description": "Token of current user"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "description": "Id of one recipe"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteRecipeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {}
+          },
+          "404": {
+            "description": "Not found",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegistrationRequest": {
+        "type": "object",
+        "required": ["email", "password", "name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User name"
+          },
+          "email": {
+            "type": "string",
+            "description": "User email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password",
+            "minLength": 6
+          }
+        },
+        "example": {
+          "name": "Alex",
+          "email": "example@gmail.com",
+          "password": "qwerty"
+        }
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "example": {
+          "user": {
+            "email": "example@gmail.com"
+          }
+        }
+      },
+      "AuthonticationRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "example": {
+          "email": "example@gmail.com",
+          "password": "qwerty"
+        }
+      },
+      "AuthonticationResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "token": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "avatar": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "user": {
+            "email": "example@gmail.com",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey2NWM2YjUwOCIsImlhdCI6MXhwIjoxNzE4MTM2NjczfQ.bh9PT4nUhpIAUVZULNxUWxLA7q5cST5d_ksfmzl_jRA",
+            "name": "Alex",
+            "avatar": "/Users/alex/Desktop/foodies-backend/public/avatars/tall.jpeg"
+          }
+        }
+      },
+      "SignOutResponse": {
+        "type": "object"
+      },
+      "CurrentUserResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "email": {
+              "type": "string"
+            },
+            "avatar": {
+              "type": "string"
+            },
+            "favorites": {
+              "type": "array"
+            },
+            "_id": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "user": {
+            "type": "object",
+            "email": "example@gmail.com",
+            "avatar": "https://s.gravatar.com/avatar/548e6f8de385bbf7740c8d6d00434d80?s=100",
+            "favorites": [],
+            "_id": "6462a8f74c3d0ddd2889803e"
+          }
+        }
+      },
+      "UserDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "createdRecipesCount": {
+            "type": "number"
+          },
+          "followersCount": {
+            "type": "number"
+          },
+          "favoritesCount": {
+            "type": "number"
+          },
+          "followingCount": {
+            "type": "number"
+          }
+        },
+        "example": {
+          "email": "example@gmail.com",
+          "avatar": "https://s.gravatar.com/avatar/548e6f8de385bbf7740c8d6d00434d80?s=100",
+          "createdRecipesCount": 2,
+          "followersCount": 3,
+          "favoritesCount": 15,
+          "followingCount": 5
+        }
+      },
+      "UserFavoritesResponse": {
+        "type": "array",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "thumb": {
+            "type": "string"
+          },
+          "ingredients": {
+            "type": "array",
+            "properties": {
+              "id": "string",
+              "measure": "string"
+            }
+          },
+          "createdAt": "string",
+          "updatedAt": "string"
+        },
+        "example": [
+          {
+            "_id": "6462a8f74c3d0ddd2889803e",
+            "title": "BBQ Pork Sloppy Joes",
+            "category": "Pork",
+            "owner": "64c8d958249fae54bae90bb9",
+            "area": "American",
+            "instructions": "Preheat oven to 450 degrees.",
+            "description": "These classic sloppy joes are made with BBQ pork instead of ground beef, and are a quick and easy dinner option.",
+            "thumb": "https://ftp.goit.study/img/so-yummy/preview/BBQ%20Pork%20Sloppy%20Joes.jpg",
+            "time": "35",
+            "ingredients": [
+              {
+                "id": "640c2dd963a319ea671e3746",
+                "measure": "2"
+              },
+              {
+                "id": "640c2dd963a319ea671e374e",
+                "measure": "1"
+              }
+            ],
+            "createdAt": "2023-03-11T19:25:33.246Z",
+            "updatedAt": "2023-10-03T17:44:41.600Z"
+          }
+        ]
+      },
+      "UserAddFavoriteResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "thumb": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "ingredients": {
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "_id": "666769661d0a786e65c6b508",
+          "password": "$2a$10$fTQDYlxdzOzP0bZ6Ei4zpeTaQwmm.SOG4zxUrm4ygg4opl008Snmm",
+          "email": "alex3@gmail.com",
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey2NWM2YjUwOCIsImlhdCI6MXhwIjoxNzE4MTM2NjczfQ.bh9PT4nUhpIAUVZULNxUWxLA7q5cST5d_ksfmzl_jRA",
+          "avatar": "https://s.gravatar.com/avatar/548e6f8de385bbf70?s=100",
+          "followers": ["6462a8sdfc3d0ddd2889803e"],
+          "following": ["6462a8f74c3d0ddd288sfsfs"],
+          "favorites": ["6462a8f74c3d0ddd2889803e"],
+          "createdAt": "2024-06-10T21:00:22.916Z",
+          "updatedAt": "2024-06-11T17:08:17.348Z"
+        }
+      },
+      "UserAvatarRequest": {
+        "type": "object",
+        "required": ["avatar"],
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "example": {
+          "avatar": "(binary)"
+        }
+      },
+      "UserAvatarResponse": {
+        "type": "object",
+        "properties": {
+          "avatar": "image.jpeg"
+        },
+        "example": {
+          "avatar": "/Users/alex/Desktop/foodies-backend/public/avatars/tall.jpeg"
+        }
+      },
+      "UserFollowingResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "bolean"
+          }
+        },
+        "example": {
+          "success": true
+        }
+      },
+      "AreasResponse": {
+        "type": "array",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "example": [
+          {
+            "_id": "666769661d0a786e65c6b508",
+            "name": "Ukrainian"
+          },
+          {
+            "_id": "6662312661d0a786e65c6b508",
+            "name": "Italian"
+          }
+        ]
+      },
+      "IngredientsResponse": {
+        "type": "array",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "img": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "example": [
+          {
+            "_id": "666769661d0a786e65c6b508",
+            "name": "Squid",
+            "desc": "A type of cephalopod with a soft, cylindrical body and long tentacles, often used in seafood dishes such as calamari or grilled squid.",
+            "img": "https://ftp.goit.study/img/so-yummy/ingredients/640c2dd963a319ea671e37aa.png"
+          },
+          {
+            "_id": "6662312661d0a786e65c6b508",
+            "name": "Cabbage",
+            "desc": "A leafy green or purple vegetable that is often used in salads, coleslaw, and stir-fry dishes, and is also commonly fermented into sauerkraut.",
+            "img": "https://ftp.goit.study/img/so-yummy/ingredients/640c2dd963a319ea671e37f5.png"
+          }
+        ]
+      },
+      "TestimonialsResponse": {
+        "type": "array",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "boject",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "testimonial": {
+            "type": "string"
+          }
+        },
+        "example": [
+          {
+            "_id": "647495d0c825f1570b04182d",
+            "owner": {
+              "_id": "64c8d958249fae54bae90bb9",
+              "name": "GoIT"
+            },
+            "testimonial": "Foodies has transformed my cooking experience! With its diverse recipe collection and user-friendly interface, I can easily find, save, and cook delicious meals for any occasion. From quick dinners to elaborate feasts, this app has become my go-to kitchen companion. Highly recommended!"
+          },
+          {
+            "_id": "647495d0c825f1570b04182e",
+            "owner": {
+              "_id": "64c8d958249fae54bae90bb8",
+              "name": "Foodies user"
+            },
+            "testimonial": "Foodies is a must-have for any home cook! With its extensive recipe collection and easy-to-use interface, I've discovered new culinary delights and streamlined my meal planning. Cooking has never been this enjoyable!"
+          }
+        ]
+      },
+      "CategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "example": {
+          "total": 3,
+          "categories": [
+            {
+              "_id": "6462a6cd4c3d0ddd28897f8a",
+              "name": "Seafood"
+            },
+            {
+              "_id": "6462a6cd4c3d0ddd28897f8b",
+              "name": "Lamb"
+            },
+            {
+              "_id": "6462a6cd4c3d0ddd28897f8c",
+              "name": "Starter"
+            }
+          ]
+        }
+      },
+      "CreateRecipeRequest": {
+        "type": "object",
+        "required": ["json", "image"],
+        "properties": {
+          "json": {
+            "type": "string",
+            "description": "All fields from form in string"
+          },
+          "image": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "RecipesResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "recipes": {
+            "$ref": "#/components/schemas/RecipeType"
+          }
+        },
+        "example": [
+          {
+            "totalCount": 296,
+            "page": 1,
+            "recipes": [
+              {
+                "_id": "6462a8f74c3d0ddd28897fbc",
+                "title": "Irish stew",
+                "category": "Beef",
+                "owner": {
+                  "favorites": [],
+                  "_id": "64c8d958249fae54bae90bb9",
+                  "name": "GoIT",
+                  "avatar": null,
+                  "email": "goit@gmail.com",
+                  "followers": [],
+                  "following": []
+                },
+                "area": "Irish",
+                "instructions": "Heat the oven to 180g",
+                "description": "A traditional Irish dish made with lamb, potatoes, carrots, onions, and herbs, cooked in a broth or gravy.",
+                "thumb": "https://ftp.goit.study/img/so-yummy/preview/Irish%20stew.jpg",
+                "time": "160",
+                "ingredients": [
+                  {
+                    "id": "640c2dd963a319ea671e3796",
+                    "measure": "300g soaked overnight in water"
+                  },
+                  {
+                    "id": "640c2dd963a319ea671e370c",
+                    "measure": "2kg cut into 3cm cubes"
+                  }
+                ],
+                "createdAt": "2023-03-11T19:25:33.240Z",
+                "updatedAt": "2024-01-25T22:12:49.038Z"
+              }
+            ]
+          }
+        ]
+      },
+      "RecipeResponse": {
+        "type": "object",
+        "$ref": "#/components/schemas/RecipeResponse",
+        "example": {
+          "_id": "6462a8f74c3d0ddd28897fbc",
+          "title": "Irish stew",
+          "category": "Beef",
+          "owner": {
+            "favorites": [],
+            "_id": "64c8d958249fae54bae90bb9",
+            "name": "GoIT",
+            "avatar": null,
+            "email": "goit@gmail.com",
+            "followers": [],
+            "following": []
+          },
+          "area": "Irish",
+          "instructions": "Heat the oven to 180g",
+          "description": "A traditional Irish dish made with lamb, potatoes, carrots, onions, and herbs, cooked in a broth or gravy.",
+          "thumb": "https://ftp.goit.study/img/so-yummy/preview/Irish%20stew.jpg",
+          "time": "160",
+          "ingredients": [
+            {
+              "id": "640c2dd963a319ea671e3796",
+              "measure": "300g soaked overnight in water"
+            },
+            {
+              "id": "640c2dd963a319ea671e370c",
+              "measure": "2kg cut into 3cm cubes"
+            }
+          ],
+          "createdAt": "2023-03-11T19:25:33.240Z",
+          "updatedAt": "2024-01-25T22:12:49.038Z"
+        }
+      },
+      "RecipeCreateResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "thumb": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "ingredients": {
+            "type": "array",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "measure": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "title": "Salsa",
+          "category": "6462a6cd4c3d0ddd28897f8a",
+          "owner": "66622f52797c90e52efd83e5",
+          "area": "6462a6f04c3d0ddd28897fb3",
+          "instructions": "30g",
+          "description": "Need to do",
+          "thumb": "recipes/1718474261154_694439574_photo.png",
+          "time": "1",
+          "ingredients": [
+            {
+              "id": "640c2dd963a319ea671e3819",
+              "measure": "300g"
+            }
+          ],
+          "favoritesCount": 0,
+          "_id": "666dd615c5446dfc0ddc086d"
+        }
+      },
+      "DeleteRecipeResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "RecipeType": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerTypes"
+          },
+          "area": {
+            "type": "string"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "thumb": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "ingredients": {
+            "type": "array",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "measure": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "OwnerTypes": {
+        "type": "object",
+        "properties": {
+          "favorites": {
+            "type": "array",
+            "properties": {
+              "type": "string"
+            }
+          },
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "followers": {
+            "type": "array"
+          },
+          "following": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
